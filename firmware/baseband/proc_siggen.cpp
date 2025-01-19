@@ -122,14 +122,27 @@ void SigGenProcessor::execute(const buffer_c8_t& buffer) {
             }
 
             if (tone_shape < 7) {  // All Option shape signals  except BPSK(7) & QPSK(8) we are modulating in FM. (Those two has phase shift modulation XPSK , not FM  )
-                // Do FM modulation
-                delta = sample * fm_delta;
+                // // Do FM modulation
+                // delta = sample * fm_delta;
 
-                phase += delta;
-                sphase = phase + (64 << 24);
+                // phase += delta;
+                // sphase = phase + (64 << 24);
 
-                re = (sine_table_i8[(sphase & 0xFF000000) >> 24]);  // sin LUT is not dealing with decimals , output range [-128 ,...127]
-                im = (sine_table_i8[(phase & 0xFF000000) >> 24]);
+                // re = (sine_table_i8[(sphase & 0xFF000000) >> 24]);  // sin LUT is not dealing with decimals , output range [-128 ,...127]
+                // im = (sine_table_i8[(phase & 0xFF000000) >> 24]);
+
+                // // Do Double Side Band modulation
+                // re = sample;
+                // im = 0;
+
+                // // Do AM modulation (100% mod index)
+                // re = (127 >> 1) + (sample >> 1);
+                // im = 0;
+
+                // Do AM modulation (50% mod index)
+                re = 95 + (sample >> 2);
+                im = 0;
+
             }
         }
 
