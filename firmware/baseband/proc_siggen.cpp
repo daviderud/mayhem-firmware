@@ -118,32 +118,40 @@ void SigGenProcessor::execute(const buffer_c8_t& buffer) {
             }
 
             if (tone_shape != 6) {         //(all except Pseudo Random White Noise). We are in (1):periodic signals or (2):BPSK/QPSK , in both cases ,we  need Tone updated acum sum phases to modulate in FM / or control phasor phase (BPSK & QPSK.)
-                tone_phase += tone_delta;  // In periodic signals(Sine/triangle/square) we are using to FM mod. in BPSK-QSPK we are using to calculate each 1/4 of the periode.
+                tone_phase += tone_delta;  // In periodic signals(Sine/triangle/square) we are using to mod. in BPSK-QSPK we are using to calculate each 1/4 of the periode.
             }
 
-            if (tone_shape < 7) {  // All Option shape signals  except BPSK(7) & QPSK(8) we are modulating in FM. (Those two has phase shift modulation XPSK , not FM  )
-                // // Do FM modulation
-                // delta = sample * fm_delta;
+            if (tone_shape < 7) {
+                // Do FM modulation
+                delta = sample * fm_delta;
 
-                // phase += delta;
-                // sphase = phase + (64 << 24);
+                phase += delta;
+                sphase = phase + (64 << 24);
 
-                // re = (sine_table_i8[(sphase & 0xFF000000) >> 24]);  // sin LUT is not dealing with decimals , output range [-128 ,...127]
-                // im = (sine_table_i8[(phase & 0xFF000000) >> 24]);
+                re = (sine_table_i8[(sphase & 0xFF000000) >> 24]);  // sin LUT is not dealing with decimals , output range [-128 ,...127]
+                im = (sine_table_i8[(phase & 0xFF000000) >> 24]);
+            }
 
-                // // Do Double Side Band modulation
-                // re = sample;
-                // im = 0;
+            // BPSK(7) & QPSK(8) have phase shift modulation XPSK, re and im left untouched
 
-                // // Do AM modulation (100% mod index)
-                // re = (127 >> 1) + (sample >> 1);
-                // im = 0;
+            if ((tone_shape > 8) && (tone_shape < 15)) {
+                // Do Double Side Band modulation
+                re = sample;
+                im = 0;
+            }
 
+            if ((tone_shape > 14) && (tone_shape < 21)) {
+                // Do AM modulation (100% mod index)
+                re = (127 >> 1) + (sample >> 1);
+                im = 0;
+            }
+
+            if ((tone_shape > 20) && (tone_shape < 28)) {
                 // Do AM modulation (50% mod index)
                 re = 95 + (sample >> 2);
                 im = 0;
-
             }
+
         }
 
         buffer.p[i] = {re, im};
