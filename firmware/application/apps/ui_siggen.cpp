@@ -89,7 +89,7 @@ SigGenView::SigGenView(
                   &options_mod});
 
     symfield_tone.hidden(1);        // At first launch , by default we are in CW: Shape ignored, we are not using Tone modulation.
-    options_mod.hidden(1);
+    options_shape.hidden(1);
     text_shape.hidden(1);
     symfield_tone.set_value(1000);  // Default: 1000 Hz
     options_shape.on_change = [this](size_t, OptionsField::value_t v) {
@@ -119,10 +119,10 @@ SigGenView::SigGenView(
         }
 
         if ((v == 0) || (v == 2) || (v == 3)) {  // In Modulation Options CW, QPSK, BPSK we are not using Shapes.
-            options_mod.hidden(1);
+            options_shape.hidden(1);
             text_shape.hidden(1);
         } else {
-            options_mod.hidden(0);
+            options_shape.hidden(0);
             text_shape.hidden(0);
         }
 

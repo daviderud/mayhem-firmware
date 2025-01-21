@@ -46,6 +46,7 @@ void SigGenProcessor::execute(const buffer_c8_t& buffer) {
             // Digital BPSK consecutive 0,1,0,...continuous cycle, 1 bit/symbol, at rate of 2 symbols / Freq Tone Periode... without any Pulse shape at the moment .
             re = (((tone_phase & 0xFF000000) >> 24) & 0x80) ? 127 : -128;  // Sending 2 bits by Periode T of the GUI tone, alternative static phasor to 0, -180º , 0º
             im = 0;
+            tone_phase += tone_delta;  // In BPSK-QSPK we are using to calculate each 1/4 of the periode.
         } else if (modulation == 3) {
             // Digital QPSK  consecutive 00, 01, 10, 11,00, ...continuous cycle ,2 bits/symbol, at rate of 4 symbols / Freq Tone Periode. not random., without any Pulse shape at the moment .
 
@@ -78,8 +79,9 @@ void SigGenProcessor::execute(const buffer_c8_t& buffer) {
                 default:
                     break;
             }
-        } else {
-            // Other modulations: FM, DSB, AM
+            tone_phase += tone_delta;  // In BPSK-QSPK we are using to calculate each 1/4 of the periode.
+
+        } else { // Other modulations: FM, DSB, AM
             if (tone_shape == 0) {
                 // Sine
                 sample = (sine_table_i8[(tone_phase & 0xFF000000) >> 24]);
@@ -118,9 +120,9 @@ void SigGenProcessor::execute(const buffer_c8_t& buffer) {
                 }
             }
 
-            if (tone_shape != 5) {         //(all except Pseudo Random White Noise). We are in (1):periodic signals or (2):BPSK/QPSK , in both cases ,we  need Tone updated acum sum phases to modulate in FM / or control phasor phase (BPSK & QPSK.)
-                tone_phase += tone_delta;  // In periodic signals(Sine/triangle/square) we are using to FM mod. in BPSK-QSPK we are using to calculate each 1/4 of the periode.
-            }  // DAVIDE spostare questo!
+            if (tone_shape != 5) {         // All periodic except Pseudo Random White Noise.
+                tone_phase += tone_delta;  // In periodic signals we are using phase to generate the tone to be modulated.
+            }
 
             if (modulation == 1) {
                 // Do FM modulation
@@ -170,7 +172,7 @@ void SigGenProcessor::on_message(const Message* const msg) {
                 auto_off = false;
 
             fm_delta = message.bw * (0xFFFFFFULL / 1536000);
-            tone_shape = message.shape * 0xF;
+            tone_shape = message.shape & 0xF;
             modulation = (message.shape & 0xF0) >> 4;
 
             // lfsr = seed_value ;  		// Finally not used , init lfsr 8 bits.
