@@ -116,7 +116,7 @@ class SigGenView : public View {
 
     OptionsField options_mod{
         {20 * 8, 20 * 8},
-        6,
+        12,
         {{"CW (No mod.)", 0},
          {"FM", 1},
          {"BPSK", 2},
