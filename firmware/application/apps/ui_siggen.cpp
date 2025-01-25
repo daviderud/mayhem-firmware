@@ -78,6 +78,7 @@ SigGenView::SigGenView(
     baseband::run_image(portapack::spi_flash::image_tag_siggen);
 
     add_children({&labels,
+                  &options_mod,
                   &options_shape,
                   &text_shape,
                   &symfield_tone,
@@ -85,8 +86,7 @@ SigGenView::SigGenView(
                   &checkbox_auto,
                   &checkbox_stop,
                   &field_stop,
-                  &tx_view,
-                  &options_mod});
+                  &tx_view});
 
     symfield_tone.hidden(1);        // At first launch , by default we are in CW: Shape ignored, we are not using Tone modulation.
     options_shape.hidden(1);
